@@ -1,0 +1,28 @@
+{
+  "name": "autovault",
+  "version": "1.0.0",
+  "description": "Local-first Chrome MV3 extension that stores your job-application profile and autofills ATS forms. Your data never leaves your device.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "icons": "node scripts/write-icons.mjs",
+    "build": "npm run icons && npm run build:pages && npm run build:content && npm run build:background",
+    "build:pages": "vite build",
+    "build:content": "vite build -c vite.content.config.ts",
+    "build:background": "vite build -c vite.background.config.ts",
+    "clean": "rimraf dist"
+  },
+  "devDependencies": {
+    "@preact/preset-vite": "^2.9.1",
+    "@types/chrome": "^0.0.270",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.5.4",
+    "vite": "^5.4.2"
+  },
+  "dependencies": {
+    "preact": "^10.23.2"
+  }
+}
