@@ -1,7 +1,7 @@
 {
   "name": "autovault",
   "version": "1.0.0",
-  "description": "Local-first Chrome MV3 extension that stores your job-application profile and autofills ATS forms. Your data never leaves your device.",
+  "description": "Local-first Chrome MV3 extension that keeps your job-application profile in a side panel so you can copy any field or document with one click. Your data never leaves your device.",
   "private": true,
   "type": "module",
   "license": "MIT",
