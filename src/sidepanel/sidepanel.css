@@ -81,6 +81,14 @@ body {
 .sp-btn--wide { width: 100%; }
 .sp-btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
 .sp-btn--done { color: var(--good); border-color: var(--good); }
+.sp-btn--sm { padding: 6px 10px; font-size: 12.5px; }
+
+/* Documents section */
+.sp-docs { display: flex; flex-direction: column; gap: 8px; padding: 2px 4px 4px; }
+.sp-docs__empty { font-size: 12.5px; color: var(--text-dim); margin: 4px; }
+.sp-docrow { display: flex; flex-direction: column; gap: 8px; }
+.sp-docrow__file { font-size: 13px; overflow-wrap: anywhere; }
+.sp-docrow__actions { display: flex; gap: 8px; }
 
 /* Collapsible sections */
 .sp-section { border: 1px solid var(--border); border-radius: 10px; background: var(--surface); overflow: hidden; }

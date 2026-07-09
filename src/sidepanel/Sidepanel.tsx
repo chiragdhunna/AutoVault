@@ -10,8 +10,9 @@
  */
 import { useEffect, useState } from 'preact/hooks';
 import type { ComponentChildren } from 'preact';
-import type { AutoVaultStore, JobProfile } from '../types/schema';
+import type { AutoVaultStore, JobProfile, DocumentMeta } from '../types/schema';
 import { loadIndex, loadStore, setActiveProfile, unlock } from '../lib/storage';
+import { getDocumentObjectUrl } from '../lib/db';
 import { resolveFieldValue, type FieldKey } from '../lib/fields';
 
 type Phase = 'loading' | 'locked' | 'ready';
@@ -125,11 +126,16 @@ function toPlainText(profile: JobProfile, sections: SectionData[]): string {
   return lines.join('\n').trim() + '\n';
 }
 
+function docKindLabel(kind: DocumentMeta['kind']): string {
+  return kind === 'resume' ? 'Résumé' : 'Cover letter';
+}
+
 export function Sidepanel() {
   const [phase, setPhase] = useState<Phase>('loading');
   const [store, setStore] = useState<AutoVaultStore | null>(null);
   const [query, setQuery] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
   const [pass, setPass] = useState('');
   const [unlockErr, setUnlockErr] = useState('');
 
@@ -166,6 +172,7 @@ export function Sidepanel() {
     setStore(await loadStore());
     setQuery('');
     setCopiedId(null);
+    setSelectedDocId(null);
   }
 
   function flashCopied(id: string) {
@@ -180,6 +187,11 @@ export function Sidepanel() {
     } catch {
       /* clipboard permission denied — nothing we can do from here */
     }
+  }
+
+  async function onPreviewDoc(doc: DocumentMeta) {
+    const url = await getDocumentObjectUrl(doc.blobKey);
+    if (url) window.open(url, '_blank', 'noopener');
   }
 
   if (phase === 'loading') {
@@ -221,6 +233,9 @@ export function Sidepanel() {
         .filter((s) => s.rows.length)
     : allSections;
   const plainText = toPlainText(active, allSections);
+  const currentDoc: DocumentMeta | undefined =
+    active.documents.find((d) => d.id === selectedDocId) ?? active.documents[0];
+  const docCopyId = currentDoc ? `docname:${currentDoc.id}` : '';
 
   return (
     <div class="sp">
@@ -247,6 +262,40 @@ export function Sidepanel() {
           onInput={(e) => setQuery((e.target as HTMLInputElement).value)}
         />
       </div>
+
+      <CollapsibleSection title="Documents" count={active.documents.length}>
+        {active.documents.length === 0 ? (
+          <p class="sp-docs__empty">No résumé or cover letter saved for this profile. Add them in the ⚙️ options page.</p>
+        ) : (
+          <div class="sp-docs">
+            <select
+              class="sp-input sp-select"
+              value={currentDoc?.id ?? ''}
+              onChange={(e) => setSelectedDocId((e.target as HTMLSelectElement).value)}
+            >
+              {active.documents.map((d) => (
+                <option value={d.id}>{`${docKindLabel(d.kind)} — ${d.fileName}`}</option>
+              ))}
+            </select>
+            {currentDoc && (
+              <div class="sp-docrow">
+                <span class="sp-docrow__file">📄 {currentDoc.fileName}</span>
+                <div class="sp-docrow__actions">
+                  <button
+                    class={`sp-btn sp-btn--sm ${copiedId === docCopyId ? 'sp-btn--done' : ''}`}
+                    onClick={() => copyValue(docCopyId, currentDoc.fileName)}
+                  >
+                    {copiedId === docCopyId ? '✓ Copied' : 'Copy filename'}
+                  </button>
+                  <button class="sp-btn sp-btn--sm" onClick={() => onPreviewDoc(currentDoc)}>
+                    Preview
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </CollapsibleSection>
 
       <button
         class={`sp-btn sp-btn--wide ${copiedId === '__all__' ? 'sp-btn--done' : ''}`}
