@@ -2,7 +2,6 @@ import { useEffect, useState } from 'preact/hooks';
 import type { AutoVaultStore } from '../types/schema';
 import { loadIndex, loadStore, setActiveProfile, unlock, type StoreIndex } from '../lib/storage';
 import { buildFillPayload } from '../lib/payload';
-import { detectAts, atsLabel } from '../lib/ats';
 import type { FillResult, ContentMessage } from '../shared/messages';
 
 type Phase = 'loading' | 'locked' | 'ready';
@@ -40,7 +39,6 @@ export function Popup() {
   const [index, setIndex] = useState<StoreIndex | null>(null);
   const [store, setStore] = useState<AutoVaultStore | null>(null);
   const [tabId, setTabId] = useState<number | undefined>();
-  const [atsName, setAtsName] = useState('Generic form');
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<FillResult | null>(null);
   const [status, setStatus] = useState('');
@@ -53,13 +51,6 @@ export function Popup() {
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     setTabId(tab?.id);
-    if (tab?.url) {
-      try {
-        setAtsName(atsLabel(detectAts(new URL(tab.url).hostname)));
-      } catch {
-        /* non-web URL */
-      }
-    }
 
     if (idx.encrypted && !idx.unlocked) {
       setPhase('locked');
@@ -171,11 +162,6 @@ export function Popup() {
             <option value={p.id}>{p.name}</option>
           ))}
         </select>
-      </div>
-
-      <div class="pp-detected">
-        <span class="pp-dot" />
-        Detected: <strong>{atsName}</strong>
       </div>
 
       <button class="pp-btn pp-btn--primary pp-btn--fill" onClick={onAutofill} disabled={busy}>
