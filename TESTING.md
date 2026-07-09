@@ -1,8 +1,9 @@
 # Testing AutoVault manually
 
-AutoVault touches real, third-party application forms, so the most valuable
-testing is manual against live postings. This guide walks through setup and a
-per-platform checklist.
+AutoVault is a local, copy-and-reference side panel — it never touches web
+pages — so testing is entirely self-contained: seed a profile, open the panel,
+and exercise copy / search / documents / profiles / encryption. No live job
+postings required.
 
 ## 0. Build & load
 
@@ -12,107 +13,102 @@ npm run build      # → dist/
 ```
 
 - `chrome://extensions` → **Developer mode** → **Load unpacked** → select `dist/`.
-- After any code change: `npm run build`, then click the **↻ reload** icon on the AutoVault card. (Reload matters most for `content.js` / `background.js`.)
-- Open the service-worker console via the **"service worker"** link on the extension card to see background logs.
+- After any code change: `npm run build`, then click the **↻ reload** icon on the
+  AutoVault card. (Reload matters most for `background.js`.)
+- Open the service-worker console via the **"service worker"** link on the
+  extension card to see background logs.
 
-## 1. Seed a profile
+## 1. Seed a profile (options page)
 
-1. Open the options page (opens automatically on install, or right-click the icon → **Options**).
-2. Fill in **Personal**, **Contact**, **Links**, and **Work** with realistic values. Changes autosave (watch the "Saved ✓" chip).
-3. Upload a résumé (any small PDF) under **Documents** → confirm it shows filename + size, and **Preview** opens it in a new tab.
+1. Open the options page (opens automatically on install, or right-click the
+   icon → **Options**).
+2. Fill in **Personal**, **Contact**, **Links**, and **Work** with realistic
+   values. Changes autosave (watch the "Saved ✓" chip).
+3. Upload a résumé (any small PDF) under **Documents** → confirm it shows
+   filename + size, and **Preview** opens it in a new tab.
 4. Add one **Q&A** pair, e.g. *"Why do you want to work here?" → "…"*.
 5. Leave the **EEO / voluntary** toggle **off** for now.
 
-## 2. Popup smoke test
+## 2. Open the side panel
 
-- Click the toolbar icon on any normal web page. The popup shows the active profile, a detected-ATS chip ("Generic form" off-ATS), and **⚡ Autofill this page**.
-- The quick profile switcher changes the active profile immediately.
-
----
-
-## 3. Per-platform tests
-
-For each, open a **real job posting's application page** (search the platform for
-any open role), then click **Autofill this page** in the popup.
-
-### Greenhouse  (`boards.greenhouse.io`, `job-boards.greenhouse.io`)
-Good first target — clean labels/ids.
-- [ ] First name, Last name, Email, Phone fill correctly.
-- [ ] LinkedIn / Website custom questions fill (label-matched).
-- [ ] The résumé file input gets a dashed outline + **"Attach your résumé here"** tooltip; **Copy filename** copies the stored filename.
-- [ ] Filled fields flash green.
-- [ ] Popup reports a plausible "*N fields filled*".
-
-### Lever  (`jobs.lever.co`)
-Uses stable field names (`name`, `email`, `phone`, `org`, `urls[...]`).
-- [ ] Full name (single field), Email, Phone fill.
-- [ ] Current company (`org`) fills.
-- [ ] LinkedIn / GitHub / Portfolio URL fields fill via the `urls[...]` names.
-- [ ] "Additional information" textarea: if it matches a Q&A question, it fills; otherwise it's left alone.
-
-### Workday  (`*.myworkdayjobs.com`)
-React app keyed by `data-automation-id`; multi-step.
-- [ ] On the **My Information** step, First/Last name, Email, Phone fill.
-- [ ] Address line 1, City, Postal code fill (text inputs).
-- [ ] **Expected:** custom popup **dropdowns** (Country, State) are *not* auto-set — this is a documented limitation.
-- [ ] Advancing to a later step re-fills newly-rendered text fields (MutationObserver).
-
-### iCIMS  (`*.icims.com`)
-Often an iframe with opaque ids; relies on label matching + `all_frames`.
-- [ ] First/Last name, Email, Phone fill via visible labels.
-- [ ] If the form is inside an iframe, filling still works (content script runs in all frames).
-
-### LinkedIn Easy Apply  (`www.linkedin.com`)
-- [ ] Open a job with the **Easy Apply** button and start it (the modal appears).
-- [ ] Phone number / email prefill only inside the **modal** — verify the page's global search bar is **never** touched (adapter scopes to the dialog).
-- [ ] Clicking **Next** to a new step fills fields that render on that step.
+- Click the AutoVault toolbar icon on any page. The **side panel** opens on the
+  right (it does not inject anything into the page).
+- The panel shows: a **Profile** switcher, a **Filter fields** box, a
+  **Documents** section, a **Copy all as text** button, and the profile grouped
+  into collapsible sections (Personal, Contact, Links, Work, EEO, Q&A Bank).
 
 ---
 
-## 4. Feature tests
+## 3. Copy-field tests
 
-**Controlled-input correctness (React/Vue)**
-- [ ] On any React ATS (Greenhouse/Workday), after autofill, click into a filled field and blur it — the value persists and no "required" validation error re-appears (proves `input`/`change` dispatched).
+- [ ] Each field row shows its **label** and **value** with a copy button.
+- [ ] Click a copy button → it flips to a green check (**Copied!**) for ~1.5s,
+      then reverts. Paste into any text editor → the exact value is on the
+      clipboard.
+- [ ] Empty profile fields are **not** shown (only fields with values appear).
+- [ ] **Copy all as text** copies a plain-text block of the whole active
+      profile (section headings + `Label: value` lines). Paste to verify.
 
-**Selects / radios / checkboxes**
-- [ ] A `<select>` (e.g. Country) picks the option matching your stored value via fuzzy match.
-- [ ] A Yes/No radio (e.g. "Do you require sponsorship?") selects the option matching your Work setting.
+## 4. Search / filter
 
-**Multiple profiles**
-- [ ] Create a second profile, give it different values, switch active in the popup, autofill again → the second profile's values appear.
-- [ ] Duplicate a profile → an independent copy is created. Delete → active falls back to another profile.
+- [ ] Type in the **Filter fields** box (e.g. `email`) → only rows whose label
+      matches remain, and their sections auto-expand.
+- [ ] Clearing the box restores all sections.
+- [ ] A no-match query shows the "No fields match your filter." message.
 
-**EEO / voluntary (opt-in)**
-- [ ] With the voluntary toggle **off**, autofill on a form with gender/veteran/disability fields → those are **not** filled.
-- [ ] Turn the toggle **on**, set values, autofill → they fill.
+## 5. Documents dropdown
 
-**File hints**
-- [ ] With no résumé uploaded, the file hint reads "Attach your résumé here" (no filename button).
-- [ ] With a résumé uploaded, the **Copy filename** button copies the exact filename.
+- [ ] The **Documents** section lists the profile's résumé / cover letter in a
+      dropdown (labelled e.g. *Résumé — myresume.pdf*).
+- [ ] **Copy filename** copies the exact filename (Copied! check).
+- [ ] **Preview** opens the stored file in a new browser tab (blob URL).
+- [ ] A profile with no documents shows the "No résumé or cover letter saved…"
+      hint instead of a dropdown.
+
+## 6. Profiles
+
+- [ ] Create a second profile in options with different values.
+- [ ] In the panel, switch the **Profile** dropdown → the fields, documents, and
+      "Copy all" output all reflect the newly-selected profile.
+- [ ] Duplicate a profile → an independent copy is created. Delete → the active
+      profile falls back to another one.
+
+## 7. Launcher popup
+
+- The toolbar icon opens the side panel directly. The popup is a **minimal
+  launcher** (active profile name + **Open AutoVault panel** button + a link to
+  the options page) and intentionally does **not** duplicate the field list.
+- [ ] If shown, the popup reflects the active profile name and its button opens
+      the side panel.
+
+---
+
+## 8. Feature tests
 
 **Encryption**
-- [ ] Options → **Security** → enable encryption with a passphrase (≥ 8 chars). Reload the extension.
-- [ ] Reopen options → you're prompted to **unlock**; wrong passphrase is rejected, correct one decrypts.
-- [ ] The popup shows the active profile name while locked, but **Autofill** requires unlocking.
+- [ ] Options → **Security** → enable encryption with a passphrase (≥ 8 chars).
+      Reload the extension.
+- [ ] Open the side panel → it shows a **Locked** state; a wrong passphrase is
+      rejected, the correct one reveals the fields.
 - [ ] Change passphrase, then turn encryption off → data is readable again.
-- [ ] Inspect `chrome://extensions` → service worker → Application → Storage → `chrome.storage.local`: the payload is ciphertext while encrypted.
+- [ ] Inspect `chrome://extensions` → service worker → Application → Storage →
+      `chrome.storage.local`: the payload is ciphertext while encrypted.
 
 **Export / import / delete**
 - [ ] Export JSON downloads a file containing your profiles + base64 documents.
 - [ ] Import that file → profiles are added with new ids (no clobbering).
-- [ ] **Delete all my data** (double-confirm) wipes storage + IndexedDB and reseeds an empty default profile.
-
-**Custom domains**
-- [ ] Options → **Custom domains** → add a host (e.g. a company careers page). Approve Chrome's per-domain permission prompt.
-- [ ] Navigate there and use the popup → autofill runs. Remove the domain → permission is revoked and the dynamic script unregisters.
-
-**On-demand injection (activeTab)**
-- [ ] On a non-ATS page that still has a contact-style form, click **Autofill** → the popup injects `content.js` (no standing host permission) and fills matching fields. On a restricted page (e.g. `chrome://`), the popup reports it can't run there.
+- [ ] **Delete all my data** (double-confirm) wipes storage + IndexedDB and
+      reseeds an empty default profile.
 
 ---
 
-## 5. Regression sanity
+## 9. Regression sanity
 
 - [ ] `npm run typecheck` passes.
-- [ ] No console errors from AutoVault on a normal browsing session (content script is silent until invoked, except opt-in auto-fill-on-load on ATS domains).
-- [ ] Re-invoking autofill on an already-filled page does not duplicate values or wipe user edits (existing non-empty fields are skipped).
+- [ ] `npm run build` produces a `dist/` with `sidepanel.html`, `popup.html`,
+      `options.html`, `background.js`, `manifest.json`, and `icons/` — and **no**
+      `content.js`.
+- [ ] No console errors from AutoVault during a normal browsing session — it
+      does nothing until you open the panel, and never runs on web pages.
+- [ ] `manifest.json` requests only `storage` and `sidePanel` permissions (no
+      host permissions, `activeTab`, or `scripting`).

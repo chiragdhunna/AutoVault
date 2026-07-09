@@ -23,7 +23,6 @@ import {
   deleteAllData,
 } from '../lib/storage';
 import { getDocumentObjectUrl } from '../lib/db';
-import { addCustomDomain, removeCustomDomain } from '../lib/domains';
 import { clone, debounce, humanFileSize, uuid } from '../lib/util';
 import { Section } from './components/Section';
 import { FieldGrid, TextField, TextAreaField, SelectField, Toggle } from './components/fields';
@@ -411,11 +410,6 @@ export function Options() {
           <EncryptionPanel encrypted={store.settings.encryption.enabled} onChanged={boot} />
         </Section>
 
-        {/* Custom domains */}
-        <Section title="Custom domains" subtitle="Enable AutoVault on career sites beyond the built-in ATS list" defaultOpen={false}>
-          <CustomDomains store={store} onChanged={reload} />
-        </Section>
-
         {/* Data */}
         <Section title="Your data" defaultOpen={false}>
           <div class="av-datarow">
@@ -608,45 +602,3 @@ function EncryptionPanel({ encrypted, onChanged }: { encrypted: boolean; onChang
   );
 }
 
-function CustomDomains({ store, onChanged }: { store: AutoVaultStore; onChanged: () => void }) {
-  const [input, setInput] = useState('');
-  const [msg, setMsg] = useState('');
-
-  async function add() {
-    setMsg('');
-    const res = await addCustomDomain(input);
-    if (res.ok) {
-      setInput('');
-      onChanged();
-    } else {
-      setMsg(res.reason ?? 'Could not add domain.');
-    }
-  }
-  async function remove(id: string) {
-    await removeCustomDomain(id);
-    onChanged();
-  }
-
-  return (
-    <div>
-      <p class="av-note">
-        AutoVault runs automatically on Greenhouse, Lever, Workday, iCIMS and LinkedIn. Add another career
-        site here — Chrome will ask you to grant access to just that domain.
-      </p>
-      <div class="av-repeater__row">
-        <input class="av-input" placeholder="careers.acme.com" value={input} onInput={(e) => setInput((e.target as HTMLInputElement).value)} />
-        <button class="av-btn av-btn--primary" onClick={add}>Add domain</button>
-      </div>
-      {msg && <p class="av-error">{msg}</p>}
-      <ul class="av-domainlist">
-        {store.customDomains.length === 0 && <li class="av-field__hint">No custom domains yet.</li>}
-        {store.customDomains.map((d) => (
-          <li>
-            <span>{d.host}</span>
-            <button class="av-iconbtn" title="Remove" onClick={() => remove(d.id)}>✕</button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}

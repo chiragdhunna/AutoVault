@@ -6,8 +6,6 @@
   --text: #1b2430;
   --text-dim: #6a7683;
   --primary: #2f6df6;
-  --danger: #d64545;
-  --good: #2e8b57;
   color-scheme: light dark;
 }
 @media (prefers-color-scheme: dark) {
@@ -19,7 +17,6 @@
     --text: #e7ecf2;
     --text-dim: #93a0ad;
     --primary: #5b8cff;
-    --good: #66c58c;
   }
 }
 
@@ -27,7 +24,7 @@
 
 html, body { margin: 0; }
 body {
-  width: 340px;
+  width: 300px;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -35,7 +32,6 @@ body {
 }
 
 .pp { padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px; }
-.pp--center { min-height: 120px; display: grid; place-items: center; color: var(--text-dim); }
 
 .pp-header { display: flex; align-items: center; justify-content: space-between; }
 .pp-brand { display: flex; align-items: center; gap: 8px; }
@@ -49,27 +45,11 @@ body {
 
 .pp-profile { display: flex; flex-direction: column; gap: 5px; }
 .pp-plabel { font-size: 12px; font-weight: 600; color: var(--text-dim); }
-
-.pp-input {
-  width: 100%;
-  padding: 9px 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-}
-.pp-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 22%, transparent); }
-.pp-select { appearance: none; cursor: pointer; }
-
-.pp-detected {
-  display: flex; align-items: center; gap: 7px;
-  font-size: 12.5px; color: var(--text-dim);
+.pp-active {
+  font-weight: 600; font-size: 14px;
   background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 7px 10px;
+  border-radius: 8px; padding: 8px 10px;
 }
-.pp-detected strong { color: var(--text); }
-.pp-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--good); flex: none; }
 
 .pp-btn {
   padding: 10px 14px; border: 1px solid var(--border-strong);
@@ -77,28 +57,8 @@ body {
   font: inherit; font-weight: 600; cursor: pointer;
 }
 .pp-btn:hover { border-color: var(--primary); }
-.pp-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 .pp-btn--primary { background: var(--primary); border-color: var(--primary); color: #fff; }
 .pp-btn--fill { font-size: 15px; padding: 12px; }
-
-.pp-result {
-  text-align: center;
-  border: 1px solid var(--border); border-radius: 10px;
-  background: var(--surface); padding: 12px;
-}
-.pp-result__big { font-size: 34px; font-weight: 750; color: var(--good); line-height: 1; }
-.pp-result__label { font-size: 13px; color: var(--text-dim); margin-top: 2px; }
-.pp-result__hint { font-size: 12px; color: var(--text-dim); margin-top: 8px; }
-
-.pp-status {
-  font-size: 12.5px; color: var(--text-dim);
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 9px 11px; text-align: center;
-}
-
-.pp-unlock { display: flex; flex-direction: column; gap: 10px; }
-.pp-lockmsg { margin: 0; font-size: 13px; color: var(--text-dim); }
-.pp-err { color: var(--danger); font-size: 12.5px; margin: 0; }
 
 .pp-link {
   border: none; background: none; color: var(--primary);
