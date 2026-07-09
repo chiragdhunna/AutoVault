@@ -24,27 +24,8 @@
   "background": {
     "service_worker": "background.js"
   },
-  "permissions": ["storage", "activeTab", "scripting"],
-  "host_permissions": [
-    "*://*.greenhouse.io/*",
-    "*://*.lever.co/*",
-    "*://*.myworkdayjobs.com/*",
-    "*://*.icims.com/*",
-    "*://*.linkedin.com/*"
-  ],
-  "optional_host_permissions": ["*://*/*"],
-  "content_scripts": [
-    {
-      "matches": [
-        "*://*.greenhouse.io/*",
-        "*://*.lever.co/*",
-        "*://*.myworkdayjobs.com/*",
-        "*://*.icims.com/*",
-        "*://*.linkedin.com/*"
-      ],
-      "js": ["content.js"],
-      "run_at": "document_idle",
-      "all_frames": true
-    }
-  ]
+  "permissions": ["storage", "sidePanel"],
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  }
 }

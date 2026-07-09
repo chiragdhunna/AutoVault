@@ -7,13 +7,11 @@
  * popup (which has activeTab + scripting) and the content script.
  */
 import { ensureInitialized, loadStore } from '../lib/storage';
-import { syncDynamicScripts } from '../lib/domains';
 import { buildFillPayload } from '../lib/payload';
 import type { PayloadResponse } from '../shared/messages';
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   await ensureInitialized();
-  await syncDynamicScripts();
   if (details.reason === 'install') {
     try {
       await chrome.runtime.openOptionsPage();
@@ -21,10 +19,6 @@ chrome.runtime.onInstalled.addListener(async (details) => {
       /* openOptionsPage can reject if no options page is focused yet */
     }
   }
-});
-
-chrome.runtime.onStartup.addListener(() => {
-  void syncDynamicScripts();
 });
 
 /**
