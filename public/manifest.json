@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "AutoVault",
   "version": "1.0.0",
-  "description": "Local-first job-application autofill for Greenhouse, Lever, Workday, iCIMS & LinkedIn Easy Apply. Your data never leaves your device.",
+  "description": "Local-first job-application companion: keep your profile and documents in a side panel and copy any field with one click — you paste into applications yourself. Your data never leaves your device.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "icons/icon-16.png",
@@ -11,8 +11,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "AutoVault — autofill this page",
-    "default_popup": "popup.html",
+    "default_title": "Open AutoVault side panel",
     "default_icon": {
       "16": "icons/icon-16.png",
       "32": "icons/icon-32.png",
